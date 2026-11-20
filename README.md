@@ -34,6 +34,9 @@ FALCON is a developer tool that analyzes a repository, constructs a symbol-level
 # Install dependencies
 pnpm install
 
+# Start TypeScript incremental watch mode
+pnpm dev
+
 # Build all packages
 pnpm build
 
