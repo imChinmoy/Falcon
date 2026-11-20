@@ -1,0 +1,22 @@
+{
+  "name": "@falcon/extractor",
+  "version": "0.1.0",
+  "description": "Symbol and relationship extractors for FALCON",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@falcon/domain": "workspace:*"
+  }
+}

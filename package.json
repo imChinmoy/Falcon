@@ -1,0 +1,29 @@
+{
+  "name": "falcon-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "FALCON — explainable code-change impact analysis",
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r --filter \"./packages/*\" run build",
+    "typecheck": "tsc --build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format:check": "prettier --check \"packages/**/src/**/*.ts\" \"README.md\"",
+    "format": "prettier --write \"packages/**/src/**/*.ts\" \"README.md\""
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.16.0",
+    "@types/node": "^22.10.1",
+    "eslint": "^9.16.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.18.0",
+    "vitest": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

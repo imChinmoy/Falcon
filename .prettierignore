@@ -1,0 +1,8 @@
+node_modules/
+dist/
+coverage/
+.falcon/
+falcon docs/
+FALCON_Project_Docs/
+pnpm-lock.yaml
+*.log

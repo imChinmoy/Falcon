@@ -1,0 +1,14 @@
+node_modules/
+dist/
+build/
+coverage/
+.turbo/
+.cache/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+.falcon/
+reports/
+*.tsbuildinfo
