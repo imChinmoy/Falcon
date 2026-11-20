@@ -51,6 +51,10 @@ pnpm lint
 pnpm format:check
 ```
 
+## Project Status
+
+Track current roadmap progress and implemented packages in [**`IMPLEMENTATION_STATUS.md`**](IMPLEMENTATION_STATUS.md).
+
 ## Documentation
 
 Full project design, algorithms, specs, and roadmap can be found in [`falcon docs/`](falcon docs/README.md).
