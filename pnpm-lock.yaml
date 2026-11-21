@@ -196,9 +196,21 @@ importers:
 
   packages/cli:
     dependencies:
+      '@falcon/diff':
+        specifier: workspace:*
+        version: link:../diff
       '@falcon/domain':
         specifier: workspace:*
         version: link:../domain
+      '@falcon/graph':
+        specifier: workspace:*
+        version: link:../graph
+      '@falcon/impact':
+        specifier: workspace:*
+        version: link:../impact
+      '@falcon/parser':
+        specifier: workspace:*
+        version: link:../parser
       '@falcon/repository':
         specifier: workspace:*
         version: link:../repository
@@ -274,12 +286,21 @@ importers:
 
   packages/impact:
     dependencies:
+      '@falcon/diff':
+        specifier: workspace:*
+        version: link:../diff
       '@falcon/domain':
         specifier: workspace:*
         version: link:../domain
       '@falcon/graph':
         specifier: workspace:*
         version: link:../graph
+      '@falcon/parser':
+        specifier: workspace:*
+        version: link:../parser
+      '@falcon/repository':
+        specifier: workspace:*
+        version: link:../repository
 
   packages/parser:
     dependencies:

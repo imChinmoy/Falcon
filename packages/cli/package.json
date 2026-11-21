@@ -21,7 +21,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@falcon/diff": "workspace:*",
     "@falcon/domain": "workspace:*",
+    "@falcon/graph": "workspace:*",
+    "@falcon/impact": "workspace:*",
+    "@falcon/parser": "workspace:*",
     "@falcon/repository": "workspace:*"
   }
 }

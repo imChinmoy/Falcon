@@ -73,7 +73,7 @@ export async function runFalconAnalysisWorkflow(
   }
 
   const inventory = await scanRepository({ rootPath: validation.value.rootPath });
-  const allDiscoveredFiles = inventory.files.map((f) => f.relativePath);
+  const allDiscoveredFiles = inventory.files.map((f: { relativePath: string }) => f.relativePath);
   const discoveredTestFiles = allDiscoveredFiles.filter(isTestFile);
 
   // 2. AST Parse & 3. Graph Build
@@ -145,7 +145,7 @@ export async function runFalconAnalysisWorkflow(
 
         // Find matching file in inventory (handling .js -> .ts / .tsx / .jsx transpiled extensions)
         const matched = allDiscoveredFiles.find(
-          (f) =>
+          (f: string) =>
             f === resolvedRelative ||
             f.replace(/\.[^/.]+$/, '') === strippedResolved ||
             f === `${resolvedRelative}/index.ts` ||
@@ -218,7 +218,8 @@ export async function runFalconAnalysisWorkflow(
 
   // If no changes were detected or supplied, fallback to default non-empty selection for testing
   if (changedFiles.length === 0 && allDiscoveredFiles.length > 0) {
-    const candidateSource = allDiscoveredFiles.find((f) => !isTestFile(f)) ?? allDiscoveredFiles[0];
+    const candidateSource =
+      allDiscoveredFiles.find((f: string) => !isTestFile(f)) ?? allDiscoveredFiles[0];
     if (candidateSource) {
       changedFiles.push(candidateSource);
     }
