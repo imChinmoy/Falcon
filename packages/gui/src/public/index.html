@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FALCON — Repository & GitHub Change Impact Analysis</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦅</text></svg>">
+</head>
+<body>
+  <!-- Apple Window Container -->
+  <div class="apple-window">
+    
+    <!-- macOS Titlebar / Header -->
+    <header class="window-titlebar">
+      <div class="traffic-lights">
+        <span class="light red" title="Close"></span>
+        <span class="light yellow" title="Minimize"></span>
+        <span class="light green" title="Maximize"></span>
+      </div>
+
+      <div class="window-title-container">
+        <div class="project-brand">
+          <span class="brand-glyph">🦅</span>
+          <span class="brand-name">FALCON</span>
+          <span class="brand-tag">Impact Engine</span>
+        </div>
+        <div class="active-repo-badge" id="activeRepoBadge">
+          <span class="status-dot"></span>
+          <span class="repo-name" id="currentRepoLabel">No Repo Ingested</span>
+          <span class="branch-pill" id="currentBranchLabel">—</span>
+        </div>
+      </div>
+
+      <!-- Segmented Navigation Controls -->
+      <nav class="segmented-control" role="tablist">
+        <button class="segment-btn active" data-tab="overview">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          Overview
+        </button>
+        <button class="segment-btn" data-tab="files">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          Files & Code
+        </button>
+        <button class="segment-btn" data-tab="graph">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"></circle><circle cx="18" cy="6" r="3"></circle><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="9" y1="6" x2="15" y2="6"></line><line x1="18" y1="9" x2="18" y2="15"></line><line x1="9" y1="18" x2="15" y2="18"></line><line x1="6" y1="9" x2="6" y2="15"></line></svg>
+          Graph
+        </button>
+        <button class="segment-btn" data-tab="impact">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+          Impact Traversal
+        </button>
+      </nav>
+
+      <!-- Action Button Group -->
+      <div class="window-actions">
+        <button class="btn btn-secondary" id="btnOpenLocalModal" title="Ingest Local Repository">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+          Local
+        </button>
+        <button class="btn btn-primary" id="btnOpenGithubModal" title="Ingest GitHub Repository">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          Ingest GitHub
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace Viewport -->
+    <main class="window-content">
+
+      <!-- ================= TAB 1: OVERVIEW ================= -->
+      <section class="tab-pane active" id="tab-overview">
+        <div class="overview-grid">
+          
+          <!-- Hero Ingestion Banner -->
+          <div class="glass-card hero-banner">
+            <div class="hero-left">
+              <span class="hero-label" id="heroSourceTag">LOCAL WORKSPACE</span>
+              <h1 class="hero-title" id="heroRepoName">FALCON Core Engine</h1>
+              <p class="hero-sub" id="heroRepoPath">Analyzing local repository path</p>
+              <div class="hero-metadata">
+                <span class="meta-item"><strong id="heroCommitSha">—</strong> (commit)</span>
+                <span class="meta-item"><strong id="heroBranchName">—</strong> (branch)</span>
+                <span class="meta-item"><strong id="heroIngestTime">—</strong></span>
+              </div>
+            </div>
+            <div class="hero-right">
+              <button class="btn btn-glass" id="btnRefreshScan">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                Rescan Repository
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Stat Cards -->
+          <div class="metric-cards-row">
+            <div class="glass-card stat-card">
+              <span class="stat-caption">Eligible Source Files</span>
+              <div class="stat-value" id="statSourceFiles">0</div>
+              <span class="stat-trend neutral" id="statTotalScanned">from 0 total scanned</span>
+            </div>
+            <div class="glass-card stat-card">
+              <span class="stat-caption">Graph Nodes</span>
+              <div class="stat-value" id="statGraphNodes">0</div>
+              <span class="stat-trend positive">Files & declared symbols</span>
+            </div>
+            <div class="glass-card stat-card">
+              <span class="stat-caption">Dependency Edges</span>
+              <div class="stat-value" id="statGraphEdges">0</div>
+              <span class="stat-trend info">Imports & relationships</span>
+            </div>
+            <div class="glass-card stat-card">
+              <span class="stat-caption">Cycle Check</span>
+              <div class="stat-value" id="statCycleStatus">Clean</div>
+              <span class="stat-trend" id="statCyclesCount">0 cyclic components</span>
+            </div>
+          </div>
+
+          <!-- Language Distribution & Diagnostics -->
+          <div class="two-col-row">
+            <div class="glass-card">
+              <h3 class="card-heading">Language Distribution</h3>
+              <div class="lang-bar" id="langBarContainer"></div>
+              <div class="lang-legend" id="langLegendContainer"></div>
+            </div>
+
+            <div class="glass-card">
+              <h3 class="card-heading">Repository Diagnostics</h3>
+              <div class="diagnostics-list" id="diagnosticsList">
+                <div class="empty-state">No diagnostics or traversal violations reported.</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ================= TAB 2: FILES & CODE ================= -->
+      <section class="tab-pane" id="tab-files">
+        <div class="split-view">
+          <!-- Sidebar: File Tree -->
+          <aside class="sidebar-pane">
+            <div class="sidebar-header">
+              <input type="text" class="input-search" id="fileSearchInput" placeholder="Filter files (e.g. .ts, /src)..." />
+              <div class="file-count-label" id="fileTreeCount">0 files</div>
+            </div>
+            <div class="file-tree" id="fileTreeContainer">
+              <div class="loading-state">Loading files...</div>
+            </div>
+          </aside>
+
+          <!-- Main: Apple Code Editor -->
+          <section class="editor-pane">
+            <div class="editor-toolbar">
+              <div class="editor-file-info">
+                <span class="file-icon">📄</span>
+                <span class="editor-file-path" id="editorFilePath">Select a file to inspect</span>
+                <span class="badge" id="editorLangBadge">typescript</span>
+                <span class="badge hash-badge" id="editorHashBadge">hash</span>
+              </div>
+              <div class="editor-actions">
+                <button class="btn btn-small btn-secondary" id="btnFindReplace">Find & Replace</button>
+                <button class="btn btn-small btn-primary" id="btnSaveFile">Save Changes</button>
+              </div>
+            </div>
+
+            <!-- Find & Replace Sub-toolbar (collapsible) -->
+            <div class="find-replace-bar hidden" id="findReplaceBar">
+              <input type="text" class="input-compact" id="inputFind" placeholder="Find pattern or string..." />
+              <input type="text" class="input-compact" id="inputReplace" placeholder="Replace with..." />
+              <button class="btn btn-small btn-secondary" id="btnApplyReplace">Replace</button>
+              <button class="btn btn-icon" id="btnCloseFindReplace">✕</button>
+            </div>
+
+            <div class="editor-container">
+              <div class="line-numbers" id="editorLineNumbers">1</div>
+              <textarea class="code-textarea" id="editorTextarea" spellcheck="false" placeholder="// File content will appear here..."></textarea>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <!-- ================= TAB 3: GRAPH ================= -->
+      <section class="tab-pane" id="tab-graph">
+        <div class="graph-view-container">
+          <div class="graph-toolbar">
+            <div class="graph-info">
+              <span class="graph-stat-badge" id="graphNodesBadge">Nodes: 0</span>
+              <span class="graph-stat-badge" id="graphEdgesBadge">Edges: 0</span>
+              <span class="graph-stat-badge" id="graphCycleBadge">Acyclic</span>
+            </div>
+            <div class="graph-controls">
+              <button class="btn btn-small btn-secondary" id="btnZoomIn">+</button>
+              <button class="btn btn-small btn-secondary" id="btnZoomOut">-</button>
+              <button class="btn btn-small btn-secondary" id="btnResetGraph">Reset View</button>
+            </div>
+          </div>
+          <div class="graph-canvas-wrapper" id="graphCanvasWrapper">
+            <svg id="dependencyGraphSvg" class="graph-svg"></svg>
+            <div class="graph-tooltip" id="graphTooltip"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB 4: IMPACT TRAVERSAL ================= -->
+      <section class="tab-pane" id="tab-impact">
+        <div class="impact-container">
+          
+          <div class="glass-card impact-setup-card">
+            <div class="impact-setup-header">
+              <div>
+                <h2 class="card-heading">Change Impact Traversal Engine</h2>
+                <p class="card-subheading">Select modified files or symbol paths to calculate direct vs transitive reverse reachability.</p>
+              </div>
+              <button class="btn btn-primary" id="btnRunImpactAnalysis">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                Calculate Impact
+              </button>
+            </div>
+
+            <div class="impact-selection-grid">
+              <div class="form-group">
+                <label class="form-label">Changed Source Files (Pick one or multiple):</label>
+                <div class="impact-file-picker" id="impactFilePicker"></div>
+              </div>
+              <div class="form-group depth-group">
+                <label class="form-label">Max Traversal Depth:</label>
+                <input type="number" class="input-compact" id="inputMaxDepth" value="5" min="1" max="20" />
+                <span class="field-hint">Traverses reverse dependency edges (`incoming`)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Impact Findings & Results -->
+          <div class="impact-results-layout" id="impactResultsContainer">
+            <div class="empty-state large">
+              <span class="empty-icon">🎯</span>
+              <h3>No Impact Analysis Performed Yet</h3>
+              <p>Select changed files above and click "Calculate Impact" to view directly affected files and propagation paths.</p>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ================= GITHUB INGESTION MODAL ================= -->
+  <div class="modal-backdrop hidden" id="githubModal">
+    <div class="modal-window apple-sheet">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          <div>
+            <h2 class="modal-title">Ingest GitHub Repository</h2>
+            <p class="modal-subtitle">FALCON shallow-clones and analyzes repository structure safely.</p>
+          </div>
+        </div>
+        <button class="btn-icon" id="btnCloseGithubModal">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Repository URL or shorthand:</label>
+          <input type="text" class="input-text" id="inputGithubUrl" placeholder="e.g. facebook/react or https://github.com/expressjs/express" />
+        </div>
+
+        <div class="preset-pill-group">
+          <span class="preset-label">Quick Presets:</span>
+          <button class="pill-btn" data-url="expressjs/express">expressjs/express</button>
+          <button class="pill-btn" data-url="pallets/flask">pallets/flask</button>
+          <button class="pill-btn" data-url="chalk/chalk">chalk/chalk</button>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label class="form-label">Branch or Ref (optional):</label>
+            <input type="text" class="input-text" id="inputGithubBranch" placeholder="main, master, v1.0.0" />
+          </div>
+          <div class="form-group flex-1">
+            <label class="form-label">Clone Depth:</label>
+            <select class="input-select" id="selectGithubDepth">
+              <option value="1" selected>1 (Fast shallow clone)</option>
+              <option value="5">5 commits</option>
+              <option value="20">20 commits</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Ingestion Progress Steps -->
+        <div class="ingest-steps-container hidden" id="ingestProgressContainer">
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="ingestProgressBar"></div>
+          </div>
+          <div class="step-log-text" id="ingestStepStatus">Starting ingestion pipeline...</div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btnCancelGithub">Cancel</button>
+        <button class="btn btn-primary" id="btnSubmitGithub">
+          <span id="btnSubmitGithubText">Start Ingestion</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= LOCAL REPOSITORY MODAL ================= -->
+  <div class="modal-backdrop hidden" id="localModal">
+    <div class="modal-window apple-sheet">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+          <div>
+            <h2 class="modal-title">Ingest Local Repository</h2>
+            <p class="modal-subtitle">Specify a directory on this machine to validate and scan.</p>
+          </div>
+        </div>
+        <button class="btn-icon" id="btnCloseLocalModal">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Directory Path:</label>
+          <input type="text" class="input-text" id="inputLocalPath" placeholder="/absolute/path/to/repo or ." value="." />
+        </div>
+
+        <div class="preset-pill-group">
+          <span class="preset-label">Preset:</span>
+          <button class="pill-btn" id="btnPresetFalconRoot">Active Falcon Project (.)</button>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btnCancelLocal">Cancel</button>
+        <button class="btn btn-primary" id="btnSubmitLocal">Ingest Directory</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification System -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

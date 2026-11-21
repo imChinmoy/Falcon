@@ -1,0 +1,29 @@
+{
+  "name": "@falcon/gui",
+  "version": "0.1.0",
+  "description": "Clean, Apple-style dark theme GUI for FALCON repository and GitHub ingestion",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "falcon-gui": "./dist/bin.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "dev": "tsc --build --watch",
+    "build": "tsc --build && cp -r src/public dist/public",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@falcon/domain": "workspace:*",
+    "@falcon/graph": "workspace:*",
+    "@falcon/impact": "workspace:*",
+    "@falcon/repository": "workspace:*"
+  }
+}

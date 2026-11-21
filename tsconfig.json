@@ -11,6 +11,8 @@
     { "path": "./packages/impact" },
     { "path": "./packages/risk" },
     { "path": "./packages/report" },
-    { "path": "./packages/cli" }
+    { "path": "./packages/cli" },
+    { "path": "./packages/gui" },
+    { "path": "./packages/db" }
   ]
 }

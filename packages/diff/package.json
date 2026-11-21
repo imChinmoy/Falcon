@@ -18,6 +18,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@falcon/domain": "workspace:*"
+    "@falcon/domain": "workspace:*",
+    "@falcon/parser": "workspace:*",
+    "@falcon/repository": "workspace:*"
   }
 }

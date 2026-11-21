@@ -12,3 +12,4 @@ coverage/
 .falcon/
 reports/
 *.tsbuildinfo
+.pnpm-store/

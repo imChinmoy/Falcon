@@ -82,11 +82,59 @@ export function validateRepositoryRoot(
 
 /**
  * Checks if a candidate path is securely contained within the repository root.
- * Protects against path traversal and symlink escaping attacks.
+ * Protects against path traversal, URL-encoding bypasses, backslash tricks,
+ * null-byte poisoning, and symlink escaping attacks.
  */
 export function isPathWithinRoot(rootPath: string, candidatePath: string): boolean {
-  const canonicalRoot = path.resolve(rootPath);
-  const canonicalCandidate = path.resolve(candidatePath);
+  if (typeof rootPath !== 'string' || typeof candidatePath !== 'string') {
+    return false;
+  }
+  if (!rootPath || !candidatePath) {
+    return false;
+  }
+  // Null byte defense
+  if (rootPath.includes('\0') || candidatePath.includes('\0')) {
+    return false;
+  }
+
+  // Iteratively decode URL-encoded components (e.g. %2e%2e%2f, double-encoding)
+  let cleanCandidate = candidatePath;
+  for (let i = 0; i < 3; i++) {
+    try {
+      const next = decodeURIComponent(cleanCandidate);
+      if (next === cleanCandidate) break;
+      cleanCandidate = next;
+    } catch {
+      break;
+    }
+  }
+
+  if (cleanCandidate.includes('\0')) {
+    return false;
+  }
+
+  // Normalize backslashes to forward slashes for cross-platform traversal defense
+  const normalizedCandidate = cleanCandidate.replace(/\\/g, '/');
+  const normalizedRoot = rootPath.replace(/\\/g, '/');
+
+  const canonicalRoot = path.resolve(normalizedRoot);
+
+  // If candidate is absolute, resolve directly; if relative, resolve relative to canonicalRoot
+  const canonicalCandidate = path.isAbsolute(normalizedCandidate)
+    ? path.resolve(normalizedCandidate)
+    : path.resolve(canonicalRoot, normalizedCandidate);
+
+  // Prefix boundary check (ensuring target is canonicalRoot or a child within canonicalRoot)
+  if (canonicalCandidate === canonicalRoot) {
+    return true;
+  }
+
+  const expectedPrefix = canonicalRoot.endsWith(path.sep)
+    ? canonicalRoot
+    : canonicalRoot + path.sep;
+  if (!canonicalCandidate.startsWith(expectedPrefix)) {
+    return false;
+  }
 
   const relative = path.relative(canonicalRoot, canonicalCandidate);
   if (relative === '') {
@@ -96,8 +144,36 @@ export function isPathWithinRoot(rootPath: string, candidatePath: string): boole
 }
 
 /**
- * Normalizes a relative path to standard POSIX forward slashes.
+ * Normalizes a relative path to standard POSIX forward slashes,
+ * safely decoding URL-encoded characters and stripping null bytes.
  */
 export function normalizeRelativePath(relativePath: string): string {
-  return relativePath.replace(/\\/g, '/');
+  if (!relativePath || typeof relativePath !== 'string') {
+    return '';
+  }
+  if (relativePath.includes('\0')) {
+    throw new RepositoryValidationError(
+      'DIAG_PATH_TRAVERSAL',
+      'Path contains forbidden null byte',
+      relativePath,
+    );
+  }
+  let decoded = relativePath;
+  for (let i = 0; i < 3; i++) {
+    try {
+      const next = decodeURIComponent(decoded);
+      if (next === decoded) break;
+      decoded = next;
+    } catch {
+      break;
+    }
+  }
+  if (decoded.includes('\0')) {
+    throw new RepositoryValidationError(
+      'DIAG_PATH_TRAVERSAL',
+      'Path contains forbidden null byte after decoding',
+      relativePath,
+    );
+  }
+  return decoded.replace(/\\/g, '/');
 }
