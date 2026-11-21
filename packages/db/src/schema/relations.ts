@@ -6,6 +6,7 @@ import { codeSymbols } from './symbols.js';
 import { dependencyEdges } from './edges.js';
 import { impactRuns, impactFindings } from './impact.js';
 import { diagnostics } from './diagnostics.js';
+import { testMappings } from './testMappings.js';
 
 export const repositoriesRelations = relations(repositories, ({ many }) => ({
   snapshots: many(analysisSnapshots),
@@ -21,6 +22,7 @@ export const analysisSnapshotsRelations = relations(analysisSnapshots, ({ one, m
   dependencyEdges: many(dependencyEdges),
   impactRuns: many(impactRuns),
   diagnostics: many(diagnostics),
+  testMappings: many(testMappings),
 }));
 
 export const sourceFilesRelations = relations(sourceFiles, ({ one }) => ({
@@ -62,6 +64,13 @@ export const impactFindingsRelations = relations(impactFindings, ({ one }) => ({
 export const diagnosticsRelations = relations(diagnostics, ({ one }) => ({
   snapshot: one(analysisSnapshots, {
     fields: [diagnostics.snapshotId],
+    references: [analysisSnapshots.id],
+  }),
+}));
+
+export const testMappingsRelations = relations(testMappings, ({ one }) => ({
+  snapshot: one(analysisSnapshots, {
+    fields: [testMappings.snapshotId],
     references: [analysisSnapshots.id],
   }),
 }));

@@ -5,6 +5,7 @@ import { runFileCommand } from './commands/file.js';
 import { runVersionCommand } from './commands/version.js';
 import { runImpactCommand } from './commands/impact.js';
 import { runInspectSymbolCommand } from './commands/inspectSymbol.js';
+import { runTestRecommendCommand } from './commands/testRecommend.js';
 
 export interface CliRunOutput {
   readonly exitCode: ExitCode;
@@ -50,9 +51,14 @@ export async function runCli(argv: string[]): Promise<CliRunOutput> {
         exclude: { type: 'string', multiple: true },
         base: { type: 'string' },
         target: { type: 'string' },
+        files: { type: 'string', multiple: true },
+        coverage: { type: 'string' },
+        'recommend-tests': { type: 'boolean' },
+        'max-tests': { type: 'string' },
         'max-depth': { type: 'string' },
         'max-results': { type: 'string' },
         'snapshot-id': { type: 'string' },
+        port: { type: 'string' },
         help: { type: 'boolean', short: 'h' },
         version: { type: 'boolean', short: 'v' },
       },
@@ -187,6 +193,30 @@ export async function runCli(argv: string[]): Promise<CliRunOutput> {
         outputFile: values.output as string | undefined,
         maxDepth,
         maxResults,
+        recommendTests: values['recommend-tests'] as boolean | undefined,
+      });
+    }
+
+    case 'test-recommend': {
+      const maxTests = values['max-tests']
+        ? parseInt(values['max-tests'] as string, 10)
+        : undefined;
+
+      // Extract files from positionals (after command) or --files
+      let filesList: string[] | undefined = values.files as string[] | undefined;
+      if (!filesList && positionals.length > 1) {
+        filesList = positionals.slice(1);
+      }
+
+      return runTestRecommendCommand({
+        repo: values.repo as string | undefined,
+        base: values.base as string | undefined,
+        target: values.target as string | undefined,
+        files: filesList,
+        coverage: values.coverage as string | undefined,
+        format,
+        outputFile: values.output as string | undefined,
+        maxTests,
       });
     }
 

@@ -26,6 +26,8 @@ FALCON is a developer tool that analyzes a repository, constructs a symbol-level
 - [`@falcon/impact`](packages/impact): Reverse reachability and impact path calculation.
 - [`@falcon/risk`](packages/risk): Explainable heuristic risk factors.
 - [`@falcon/report`](packages/report): JSON schema and terminal output formatting.
+- [`@falcon/gui`](packages/gui): Apple-style dark mode Web GUI, code editor, and interactive graph canvas.
+- [`@falcon/db`](packages/db): PostgreSQL and Supabase persistence with Drizzle ORM and transaction pooling.
 - [`falcon`](packages/cli): Unified CLI entrypoint.
 
 ## Development
@@ -57,4 +59,5 @@ Track current roadmap progress and implemented packages in [**`IMPLEMENTATION_ST
 
 ## Documentation
 
-Full project design, algorithms, specs, and roadmap can be found in [`falcon docs/`](falcon docs/README.md).
+- [**User Flow & Software Interaction Guide: How To and Why**](docs/USER_FLOW_GUIDE.md): Master manual covering end-to-end user flows, pipeline architecture, CLI developer workflows, Web GUI canvas, GitHub Actions CI/CD automation, and Supabase Drizzle persistence.
+- [`falcon docs/`](falcon%20docs/README.md): Full architectural specifications, analysis algorithms, benchmarks, data models, and roadmap.

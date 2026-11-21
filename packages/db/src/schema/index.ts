@@ -5,4 +5,5 @@ export * from './symbols.js';
 export * from './edges.js';
 export * from './impact.js';
 export * from './diagnostics.js';
+export * from './testMappings.js';
 export * from './relations.js';

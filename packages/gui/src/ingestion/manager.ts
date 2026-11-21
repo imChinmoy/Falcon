@@ -9,7 +9,8 @@ import {
   type DependencyGraph,
   type DependencyEdge,
 } from '@falcon/graph';
-import { analyzeImpact, type ImpactReport } from '@falcon/impact';
+import type { TestRecommendationReport } from '@falcon/domain';
+import { analyzeImpact, type ImpactReport, recommendTests } from '@falcon/impact';
 import { cloneOrUpdateGitHubRepository } from './github.js';
 import type {
   IngestedRepositoryInfo,
@@ -259,5 +260,25 @@ export class RepositoryManager {
     });
 
     return report;
+  }
+
+  /**
+   * Recommends relevant unit/integration tests for changed files with evidence levels.
+   */
+  recommendTests(
+    changedFiles: readonly string[],
+    coverageContent?: string | Record<string, unknown>,
+    maxTests?: number,
+  ): TestRecommendationReport {
+    if (!this.currentGraph) {
+      throw new Error('No active repository graph loaded.');
+    }
+
+    return recommendTests({
+      graph: this.currentGraph,
+      changedFiles,
+      coverage: coverageContent,
+      maxTests,
+    });
   }
 }

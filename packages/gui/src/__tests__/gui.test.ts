@@ -164,5 +164,42 @@ describe('Falcon GUI & Ingestion Engine', () => {
       const diskContent = await fs.promises.readFile(path.join(tempDir, 'index.ts'), 'utf-8');
       expect(diskContent).toBe('export const app = false;');
     });
+
+    it('returns test recommendations via /api/test-intelligence/recommend and /api/impact/analyze', async () => {
+      await fetch(`${baseUrl}/api/ingest/local`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: tempDir }),
+      });
+
+      // Impact analysis with test recommendations attached
+      const impactRes = await fetch(`${baseUrl}/api/impact/analyze`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ changedFiles: ['index.ts'] }),
+      });
+
+      expect(impactRes.status).toBe(200);
+      const impactData = (await impactRes.json()) as {
+        testRecommendations?: { totalTestsEvaluated: number; recommendedTests: unknown[] };
+      };
+      expect(impactData.testRecommendations).toBeDefined();
+
+      // Test intelligence recommendation endpoint
+      const recRes = await fetch(`${baseUrl}/api/test-intelligence/recommend`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ changedFiles: ['index.ts'] }),
+      });
+
+      expect(recRes.status).toBe(200);
+      const recData = (await recRes.json()) as {
+        analysisRunId: string;
+        recommendedTests: unknown[];
+        statistics: { totalRecommendations: number };
+      };
+      expect(recData.analysisRunId).toBeDefined();
+      expect(recData.statistics).toBeDefined();
+    });
   });
 });

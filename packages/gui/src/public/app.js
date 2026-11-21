@@ -603,6 +603,50 @@ function renderImpactResults(report) {
   }
 
   container.appendChild(pathCard);
+
+  // Recommended Tests Section
+  if (report.testRecommendations) {
+    const testCard = document.createElement('div');
+    testCard.className = 'glass-card';
+    const recs = report.testRecommendations.recommendedTests || [];
+    testCard.innerHTML = `<h3 class="card-heading">🎯 Recommended Tests (${recs.length})</h3>`;
+
+    const testList = document.createElement('div');
+    testList.className = 'affected-list';
+
+    if (recs.length === 0) {
+      testList.innerHTML = '<div class="empty-state">No test recommendations found.</div>';
+    } else {
+      recs.forEach((t) => {
+        const item = document.createElement('div');
+        item.className = 'impact-path-item';
+        item.style.marginBottom = '8px';
+        item.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong>${t.testFile}</strong>
+            <span class="confidence-tag ${t.confidence}">[${t.confidence}] ${t.evidenceLevel}</span>
+          </div>
+          <div class="path-reason" style="margin-top:4px;">
+            Target: <code>${t.targetChangedFile}</code> | Distance: ${t.distance} hops<br/>
+            ${t.reason}
+          </div>
+        `;
+        testList.appendChild(item);
+      });
+    }
+
+    if (report.testRecommendations.missingMappings && report.testRecommendations.missingMappings.length > 0) {
+      const missingWarn = document.createElement('div');
+      missingWarn.className = 'empty-state';
+      missingWarn.style.color = 'var(--accent-orange)';
+      missingWarn.style.marginTop = '8px';
+      missingWarn.innerHTML = `⚠️ <strong>Missing Test Mappings:</strong> ${report.testRecommendations.missingMappings.join(', ')}`;
+      testList.appendChild(missingWarn);
+    }
+
+    testCard.appendChild(testList);
+    container.appendChild(testCard);
+  }
 }
 
 // ================= Ingestion Modals =================

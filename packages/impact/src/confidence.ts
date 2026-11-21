@@ -3,6 +3,7 @@ import type { ConfidenceLevel } from '@falcon/domain';
 export const CONFIDENCE_RANKS: Readonly<Record<ConfidenceLevel, number>> = {
   unknown: 1,
   unresolved: 2,
+  heuristic: 2.5,
   inferred: 3,
   confirmed: 4,
 };

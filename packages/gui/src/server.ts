@@ -403,7 +403,43 @@ export function createGuiServer(options: GuiServerOptions = {}): {
           }
 
           const report = manager.runImpactAnalysis(changedFiles, body.maxDepth);
-          sendJson(res, 200, report);
+          let testRecommendations;
+          try {
+            testRecommendations = manager.recommendTests(changedFiles);
+          } catch {
+            // fallback
+          }
+
+          sendJson(res, 200, {
+            ...report,
+            testRecommendations,
+          });
+          return;
+        }
+
+        // Test Intelligence: Recommend Tests
+        if (pathname === '/api/test-intelligence/recommend' && method === 'POST') {
+          interface TestRecommendBody {
+            changedFiles?: string[];
+            coverage?: string | Record<string, unknown>;
+            maxTests?: number;
+          }
+          const body = await parseJsonBody<TestRecommendBody>(req);
+          const changedFiles = body.changedFiles ?? [];
+
+          if (changedFiles.length === 0) {
+            sendJson(res, 400, {
+              error: 'At least one changed file is required in "changedFiles".',
+            });
+            return;
+          }
+
+          const recommendations = manager.recommendTests(
+            changedFiles,
+            body.coverage,
+            body.maxTests,
+          );
+          sendJson(res, 200, recommendations);
           return;
         }
 

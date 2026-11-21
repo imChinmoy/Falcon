@@ -285,4 +285,62 @@ describe('Falcon CLI', () => {
       expect(parsed.length).toBe(2);
     });
   });
+
+  describe('test-recommend and impact with test recommendations', () => {
+    it('runs test-recommend in text and json format', async () => {
+      await fs.promises.mkdir(path.join(tempDir, 'src/__tests__'), { recursive: true });
+      await fs.promises.writeFile(
+        path.join(tempDir, 'src/auth.ts'),
+        'export function login() { return true; }\n',
+      );
+      await fs.promises.writeFile(
+        path.join(tempDir, 'src/__tests__/auth.test.ts'),
+        'import { login } from "../auth.js";\nexport function testLogin() { return login(); }\n',
+      );
+
+      // Text format
+      const textRes = await runCli(['test-recommend', '--repo', tempDir, 'src/auth.ts']);
+      expect(textRes.exitCode).toBe(ExitCodes.SUCCESS);
+      expect(textRes.stdout).toContain('FALCON Test Recommendations');
+      expect(textRes.stdout).toContain('RECOMMENDED TESTS:');
+      expect(textRes.stdout).toContain('auth.test.ts');
+
+      // JSON format
+      const jsonRes = await runCli([
+        'test-recommend',
+        '--repo',
+        tempDir,
+        'src/auth.ts',
+        '--format',
+        'json',
+      ]);
+      expect(jsonRes.exitCode).toBe(ExitCodes.SUCCESS);
+      const parsed = JSON.parse(jsonRes.stdout);
+      expect(parsed.report).toBeDefined();
+      expect(parsed.report.recommendedTests.length).toBeGreaterThan(0);
+      expect(parsed.report.recommendedTests[0].testFile).toContain('auth.test.ts');
+    });
+
+    it('runs impact command with --recommend-tests flag', async () => {
+      await fs.promises.mkdir(path.join(tempDir, 'src'), { recursive: true });
+      await fs.promises.writeFile(path.join(tempDir, 'src/math.ts'), 'export const sum = 1;');
+
+      const res = await runCli([
+        'impact',
+        '--base',
+        'HEAD~1',
+        '--target',
+        'HEAD',
+        '--repo',
+        tempDir,
+        '--recommend-tests',
+        '--format',
+        'json',
+      ]);
+
+      expect(res.exitCode).toBe(ExitCodes.SUCCESS);
+      const parsed = JSON.parse(res.stdout);
+      expect(parsed.summary).toBeDefined();
+    });
+  });
 });

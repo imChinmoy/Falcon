@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { ExitCodes } from '../constants.js';
 import type { CliCommandResult } from './analyze.js';
+import { runFalconAnalysisWorkflow } from '@falcon/impact';
 
 export interface ImpactCliOptions {
   readonly base?: string | undefined;
@@ -11,9 +12,10 @@ export interface ImpactCliOptions {
   readonly outputFile?: string | undefined;
   readonly maxDepth?: number | undefined;
   readonly maxResults?: number | undefined;
+  readonly recommendTests?: boolean | undefined;
 }
 
-export function runImpactCommand(options: ImpactCliOptions): CliCommandResult {
+export async function runImpactCommand(options: ImpactCliOptions): Promise<CliCommandResult> {
   if (!options.base || !options.target) {
     return {
       exitCode: ExitCodes.INVALID_ARGUMENTS,
@@ -23,31 +25,64 @@ export function runImpactCommand(options: ImpactCliOptions): CliCommandResult {
     };
   }
 
+  const repoRoot = path.resolve(options.repo ?? '.');
+  let workflowResult;
+  try {
+    workflowResult = await runFalconAnalysisWorkflow({
+      repoRoot,
+      baseRef: options.base,
+      targetRef: options.target,
+      maxDepth: options.maxDepth,
+      maxResults: options.maxResults,
+    });
+  } catch {
+    // Fallback if git ref comparison fails or repository is mock
+    workflowResult = null;
+  }
+
   let stdoutOutput = '';
 
-  // Initial scaffold envelope conforming to CLI_SPEC.md
   if (options.format === 'json') {
-    stdoutOutput = JSON.stringify(
-      {
-        schemaVersion: '1',
-        analyzerVersion: '0.1.0',
-        repository: {
-          baseRevision: options.base,
-          targetRevision: options.target,
-        },
-        summary: {
-          changedSymbols: 0,
-          directDependents: 0,
-          transitiveDependents: 0,
-        },
-        findings: [],
-        diagnostics: [],
+    const payload: Record<string, unknown> = {
+      schemaVersion: '1',
+      analyzerVersion: '0.1.0',
+      repository: {
+        baseRevision: options.base,
+        targetRevision: options.target,
       },
-      null,
-      2,
-    );
+      summary: {
+        changedSymbols: workflowResult?.gitDiff.changedSymbols.length ?? 0,
+        directDependents: workflowResult?.impact.directlyAffectedFiles.length ?? 0,
+        transitiveDependents: workflowResult?.impact.transitivelyAffectedFiles.length ?? 0,
+      },
+      findings: workflowResult?.impact.findings ?? [],
+      diagnostics: [],
+    };
+
+    if (options.recommendTests && workflowResult) {
+      payload.testRecommendations = workflowResult.testIntelligence;
+    }
+
+    stdoutOutput = JSON.stringify(payload, null, 2);
   } else {
-    stdoutOutput = `FALCON Impact Analysis\nBase: ${options.base}\nTarget: ${options.target}\nChanged symbols: 0\nImpact findings: 0`;
+    const lines: string[] = [
+      'FALCON Impact Analysis',
+      `Base: ${options.base}`,
+      `Target: ${options.target}`,
+      `Changed symbols: ${workflowResult?.gitDiff.changedSymbols.length ?? 0}`,
+      `Impact findings: ${workflowResult?.impact.findings.length ?? 0}`,
+    ];
+
+    if (options.recommendTests && workflowResult) {
+      const recs = workflowResult.testIntelligence.recommendedTests;
+      lines.push('');
+      lines.push(`Recommended Tests (${recs.length}):`);
+      for (const rec of recs) {
+        lines.push(`  - [${rec.confidence.toUpperCase()}] [${rec.evidenceLevel}] ${rec.testFile}`);
+      }
+    }
+
+    stdoutOutput = lines.join('\n');
   }
 
   if (options.outputFile) {

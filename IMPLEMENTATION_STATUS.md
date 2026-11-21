@@ -1,7 +1,7 @@
 # FALCON — Implementation Status & Progress Tracker
 
-> **Current Status:** Phase 1 (Repository Ingestion & Safe File Access), Phase 2 (AST Visitors & Syntax Diagnosis), Phase 3 (Directed Graph & Relation Engine), Phase 4 (Git Diff & Symbol Matching), Phase 5 (Direct/Transitive Impact Traversal Engine), `@falcon/db` (Supabase + Drizzle), Security Hardening, Performance Optimizations, and CLI/GUI Orchestration Implemented  
-> **Repository Baseline:** Monorepo initialized with `pnpm`, strict TypeScript, Vitest, ESLint, Prettier, CI, and 223 passing tests across 13 packages.
+> **Current Status:** Phase 1 (Repository Ingestion & Safe File Access), Phase 2 (AST Visitors & Syntax Diagnosis), Phase 3 (Directed Graph & Relation Engine), Phase 4 (Git Diff & Symbol Matching), Phase 5 (Direct/Transitive Impact Traversal Engine), Phase 6 (Test Intelligence & Test Recommendation Engine), `@falcon/db` (Supabase + Drizzle), Security Hardening, Performance Optimizations, and CLI/GUI Orchestration Implemented  
+> **Repository Baseline:** Monorepo initialized with `pnpm`, strict TypeScript, Vitest, ESLint, Prettier, CI, and 243 passing tests across 13 packages.
 
 ---
 
@@ -15,7 +15,7 @@
 | **Phase 3** | **Resolution and Graph** | ✅ **Core Graph Implemented** | Directed dependency graph, forward dependencies (`outgoing`), reverse adjacency (`incoming`), Kahn topological sort, cycle detection, shortest path finding. |
 | **Phase 4** | **Git Diff & Symbol Matching** | ✅ **Completed** | Git adapter (safe subprocess execution), name-status parser, revision comparison, old/new AST parse, layered symbol matching (add/mod/del/renamed/ambiguous). |
 | **Phase 5** | **Impact and Reports** | ✅ **Core Traversal Implemented** | Reverse reachability traversal, directly affected files vs transitive dependents, shortest impact paths, confidence propagation, depth/result truncation limits. |
-| **Phase 6** | **Test Intelligence** | ⏳ *Pending* | Static test mapping, optional coverage ingestion, test recommendations with evidence levels. |
+| **Phase 6** | **Test Intelligence** | ✅ **Completed** | Test-file discovery, static test mapping, LCOV/JSON coverage ingestion, test recommendations with evidence levels, database persistence, and end-to-end workflow. |
 | **Phase 7** | **Performance & Incremental** | ⏳ *Pending* | Content-hash caching, incremental invalidation, benchmarks, cancellation limits. |
 | **Phase 8** | **Product Layer** | ⏸️ *Deferred* | API, Postgres, Redis/worker queue, GitHub App, web dashboard (scope guard: after Phase 5). |
 
@@ -25,21 +25,21 @@
 
 | Package | Purpose | Dependencies | Tests Passing | Status |
 |---|---|---|---|---|
-| [`@falcon/domain`](packages/domain) | Core entities, contracts, error models, and Result/ID utilities | None (pure domain) | ✅ 10 tests | **Implemented** |
+| [`@falcon/domain`](packages/domain) | Core entities, contracts, error models, and Result/ID utilities | None (pure domain) | ✅ 11 tests | **Implemented** |
 | [`@falcon/repository`](packages/repository) | File discovery, root validation, traversal defense, hashing, and safe file operations | `@falcon/domain`, `ignore` | ✅ 53 tests | **Hardened & Implemented** |
 | [`@falcon/parser`](packages/parser) | AST creation, iterative traversal, and syntax diagnostics via TypeScript API | `@falcon/domain` | ✅ 18 tests | **Optimized & Implemented** |
 | [`@falcon/extractor`](packages/extractor) | Symbols, declarations, imports, exports, and call candidates | `@falcon/domain` | ✅ 1 test | Boundary Ready |
 | [`@falcon/resolver`](packages/resolver) | Module and symbol binding, static call resolution | `@falcon/domain` | ✅ 1 test | Boundary Ready |
 | [`@falcon/graph`](packages/graph) | Directed graph structures, reverse adjacency, Kahn topological sort, cycle detection, and LRU cache | `@falcon/domain` | ✅ 29 tests | **Optimized & Implemented** |
 | [`@falcon/diff`](packages/diff) | Git revision comparison, name-status diff, and layered symbol matching | `@falcon/domain`, `@falcon/parser`, `@falcon/repository` | ✅ 17 tests | **Hardened & Implemented** |
-| [`@falcon/impact`](packages/impact) | Reverse reachability traversal, directly affected files, and impact paths | `@falcon/domain`, `@falcon/graph` | ✅ 17 tests | **Optimized & Implemented** |
+| [`@falcon/impact`](packages/impact) | Reverse reachability traversal, directly affected files, and impact paths | `@falcon/domain`, `@falcon/graph` | ✅ 32 tests | **Phase 6 Implemented** |
 | [`@falcon/risk`](packages/risk) | Explainable heuristic risk factor vectors | `@falcon/domain` | ✅ 1 test | Boundary Ready |
 | [`@falcon/report`](packages/report) | JSON schema serialization and human-readable terminal output | `@falcon/domain` | ✅ 1 test | Boundary Ready |
-| [`falcon`](packages/cli) | Unified command-line interface orchestration and repository file operations | All core packages | ✅ 13 tests | **Implemented** |
-| [`@falcon/gui`](packages/gui) | Apple-style dark mode Web GUI, GitHub & local ingestion, code editor, and impact visualizer | `@falcon/domain`, `@falcon/repository`, `@falcon/graph`, `@falcon/impact` | ✅ 20 tests | **Hardened & Implemented** |
-| [`@falcon/db`](packages/db) | Supabase & PostgreSQL persistence with Drizzle ORM, pooling, schema, and migrations | `@falcon/domain`, `drizzle-orm`, `postgres`, `@supabase/supabase-js` | ✅ 33 tests | **Implemented** |
+| [`falcon`](packages/cli) | Unified command-line interface orchestration and repository file operations | All core packages | ✅ 23 tests | **Implemented** |
+| [`@falcon/gui`](packages/gui) | Apple-style dark mode Web GUI, GitHub & local ingestion, code editor, and impact visualizer | `@falcon/domain`, `@falcon/repository`, `@falcon/graph`, `@falcon/impact` | ✅ 21 tests | **Hardened & Implemented** |
+| [`@falcon/db`](packages/db) | Supabase & PostgreSQL persistence with Drizzle ORM, pooling, schema, and migrations | `@falcon/domain`, `drizzle-orm`, `postgres`, `@supabase/supabase-js` | ✅ 34 tests | **Implemented** |
 
-**Total:** 13 packages | 30 test suites | **223 tests passing**
+**Total:** 13 packages | 32 test suites | **243 tests passing**
 
 ---
 
@@ -203,6 +203,44 @@
 - **O(N) Symbol Matcher Scaling (`@falcon/diff`):**
   - Replaced O(N²) nested loops in rename candidate matching with Map-indexed signature lookups, scaling linearly on large revision diffs (2,000 symbols in < 300ms).
 
+### 3.13 Phase 6 — Test Intelligence Deliverables (`@falcon/impact`, `@falcon/domain`, `@falcon/db`)
+- **Domain Modeling (`@falcon/domain`):**
+  - `EvidenceLevel`: `'direct_import' | 'transitive_dependency' | 'naming_convention' | 'coverage'`
+  - `ConfidenceLevel`: `'confirmed' | 'inferred' | 'heuristic' | 'unresolved' | 'unknown'`
+  - `TestMapping`: maps test files/symbols to source files/symbols with evidence level, line numbers, and confidence ratings.
+  - `TestRecommendation`: test file, test symbols, target changed file/symbol, distance, reason, priority (`high` | `medium` | `low`).
+  - `CoverageGap`: tracks unexecuted lines and uncovered files.
+  - `TestRecommendationReport`: recommended tests, total tests evaluated, missing mappings, coverage gaps, and statistics.
+- **Test File Discovery & Conventions (`discovery.ts`):**
+  - Detects `*.test.ts`, `*.spec.ts`, `*.test.tsx`, `*.spec.tsx`, `__tests__/**`, `tests/**`, `test/**`.
+  - Bidirectional naming inference: `src/auth.ts` <-> `src/__tests__/auth.test.ts`, `src/auth.test.ts`.
+- **Coverage Ingestion Engine (`coverage.ts`):**
+  - Native LCOV parser (`SF:`, `DA:`, `LF:`, `LH:`, `TN:`, `end_of_record`).
+  - Istanbul / Vitest JSON parser (`statementMap` + `s` counts and custom coverage format).
+  - Coverage gap detection: identifies changed lines and files not executed by tests.
+- **Static Test Mapping Engine (`mapping.ts`):**
+  - Scans graph for test nodes and inspects outgoing import/call/reference edges (`direct_import` / `confirmed`).
+  - Connects co-located naming convention heuristics (`naming_convention` / `heuristic`).
+  - Maps test execution coverage records (`coverage` / `confirmed`).
+- **Test Recommendation Algorithm (`recommendation.ts`):**
+  - Traverses dependency graph from changed files and symbols.
+  - Directly affected files/symbols mapped to tests (Distance = 1).
+  - Transitively affected dependents mapped to tests (Distance > 1).
+  - Prioritizes by distance, evidence level, and confidence.
+  - Identifies `test_mapping_missing` when changed files or symbols have no mapped tests.
+- **Database Persistence (`@falcon/db`):**
+  - `test_mappings` PostgreSQL/Drizzle table with foreign key cascade to `analysis_snapshots`.
+  - Relations exported in `relations.ts` linking snapshots to test mappings.
+- **CLI Integration (`packages/cli`):**
+  - New `falcon test-recommend` command supporting `--repo`, `--base`, `--target`, `--files`, `--coverage`, `--format`, `--output`.
+  - Added `--recommend-tests` flag to `falcon impact`.
+- **GUI Integration (`@falcon/gui`):**
+  - Added `POST /api/test-intelligence/recommend` endpoint.
+  - Enhanced `POST /api/impact/analyze` to return test recommendations.
+  - Added glass card UI in dark theme displaying recommended tests with badges and missing mappings.
+- **End-to-End Workflow (`workflow.ts`):**
+  - `runFalconAnalysisWorkflow`: Repo Scan -> AST Parse -> Graph Build -> Git Diff -> Impact Traversal -> Test Intelligence Recommendation.
+
 ---
 
 ## 4. How to Work with the CLI
@@ -307,9 +345,28 @@ node packages/cli/dist/bin.js inspect-symbol "src/pricing.ts#calculatePrice"
 # Change impact report between two Git references
 node packages/cli/dist/bin.js impact --base main --target HEAD
 node packages/cli/dist/bin.js impact --base v1.0.0 --target v1.1.0 --format json --max-depth 5
+
+# Change impact report with recommended tests included
+node packages/cli/dist/bin.js impact --base main --target HEAD --recommend-tests
 ```
 
-#### 9. Version and Help
+#### 9. Test Recommendation & Intelligence
+Recommends relevant unit and integration tests to run based on changed files, static graph dependency edges, co-located naming conventions, and optional execution coverage.
+```bash
+# Recommend tests for specific changed files
+node packages/cli/dist/bin.js test-recommend src/auth.ts src/payment.ts
+
+# Recommend tests based on Git diff revisions
+node packages/cli/dist/bin.js test-recommend --base main --target HEAD
+
+# Recommend tests with LCOV or JSON coverage report ingestion
+node packages/cli/dist/bin.js test-recommend src/auth.ts --coverage coverage/lcov.info
+
+# Output structured JSON report or save to output file
+node packages/cli/dist/bin.js test-recommend src/auth.ts --format json --output test-report.json
+```
+
+#### 10. Version and Help
 ```bash
 node packages/cli/dist/bin.js version
 node packages/cli/dist/bin.js version --format json

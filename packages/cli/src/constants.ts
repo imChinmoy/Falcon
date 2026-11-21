@@ -27,6 +27,7 @@ Commands:
   file delete <path>           Safely delete a file within the repository
   inspect-symbol <selector>    Inspect a symbol and its relationships
   impact                       Compare revisions and generate impact report
+  test-recommend               Recommend relevant tests for changed files with evidence levels
   gui                          Launch the clean Apple-style dark mode Web GUI dashboard
   version                      Print CLI and analyzer version
   help                         Display this help message
@@ -42,5 +43,9 @@ Options:
   --exclude <glob>             Exclude glob pattern for scanning
   --base <git-ref>             Base git revision (for impact)
   --target <git-ref>           Target git revision (for impact)
+  --files <paths>              Explicit changed file list (comma-separated or multiple)
+  --coverage <path>            Path to LCOV or JSON coverage report
+  --recommend-tests            Include test recommendations in impact report
+  --max-tests <n>              Maximum number of tests to recommend
   --help, -h                   Show this help message
 `;

@@ -4,5 +4,6 @@ export * from './models/file.js';
 export * from './models/snapshot.js';
 export * from './models/diagnostic.js';
 export * from './models/impact.js';
+export * from './models/test.js';
 export * from './utils/result.js';
 export * from './utils/id.js';

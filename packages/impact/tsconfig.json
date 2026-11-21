@@ -10,6 +10,15 @@
     },
     {
       "path": "../graph"
+    },
+    {
+      "path": "../repository"
+    },
+    {
+      "path": "../parser"
+    },
+    {
+      "path": "../diff"
     }
   ],
   "include": [

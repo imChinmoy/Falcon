@@ -11,6 +11,9 @@ import {
   type CodeSymbol,
   type DependencyEdge,
   type ImpactFinding,
+  type TestMapping,
+  type TestRecommendation,
+  type TestRecommendationReport,
 } from './index.js';
 
 describe('@falcon/domain', () => {
@@ -120,6 +123,54 @@ describe('@falcon/domain', () => {
         reason: 'Compiler-resolved call expression',
       };
       expect(finding.impactKind).toBe('direct');
+    });
+
+    it('satisfies TestMapping and TestRecommendation interfaces', () => {
+      const mapping: TestMapping = {
+        id: 'test-map-1',
+        snapshotId: 'snap-1',
+        testFilePath: 'src/__tests__/auth.test.ts',
+        testSymbolId: 'src/__tests__/auth.test.ts#testLogin',
+        sourceFilePath: 'src/auth.ts',
+        sourceSymbolId: 'src/auth.ts#login',
+        evidenceLevel: 'direct_import',
+        confidence: 'confirmed',
+        line: 12,
+      };
+      expect(mapping.evidenceLevel).toBe('direct_import');
+      expect(mapping.confidence).toBe('confirmed');
+
+      const recommendation: TestRecommendation = {
+        testFile: 'src/__tests__/auth.test.ts',
+        testSymbols: ['testLogin'],
+        targetChangedFile: 'src/auth.ts',
+        targetSymbol: 'login',
+        evidenceLevel: 'direct_import',
+        confidence: 'confirmed',
+        distance: 1,
+        reason: 'Direct import of changed symbol login in auth.test.ts',
+        priority: 'high',
+      };
+      expect(recommendation.distance).toBe(1);
+
+      const report: TestRecommendationReport = {
+        analysisRunId: 'run-1',
+        recommendedTests: [recommendation],
+        totalTestsEvaluated: 5,
+        coverageGaps: [],
+        missingMappings: [],
+        statistics: {
+          totalRecommendations: 1,
+          directTestCount: 1,
+          transitiveTestCount: 0,
+          namingHeuristicCount: 0,
+          coverageDerivedCount: 0,
+          missingMappingsCount: 0,
+          executionTimeMs: 15,
+        },
+      };
+      expect(report.totalTestsEvaluated).toBe(5);
+      expect(report.statistics.totalRecommendations).toBe(1);
     });
   });
 });

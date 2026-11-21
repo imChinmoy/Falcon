@@ -1,7 +1,7 @@
 export type EdgeType =
   'IMPORTS_MODULE' | 'IMPORTS_SYMBOL' | 'CALLS' | 'REFERENCES' | 'EXTENDS' | 'IMPLEMENTS' | 'TESTS';
 
-export type ConfidenceLevel = 'confirmed' | 'inferred' | 'unresolved' | 'unknown';
+export type ConfidenceLevel = 'confirmed' | 'inferred' | 'heuristic' | 'unresolved' | 'unknown';
 
 export type ResolutionStatus = 'resolved' | 'unresolved' | 'ambiguous' | 'unsupported';
 

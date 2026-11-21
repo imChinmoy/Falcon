@@ -17,6 +17,8 @@ import {
   impactRunsRelations,
   impactFindingsRelations,
   diagnosticsRelations,
+  testMappings,
+  testMappingsRelations,
 } from '../schema/index.js';
 import { normalizeConnectionString } from '../migrate.js';
 
@@ -142,6 +144,23 @@ describe('@falcon/db schema definitions', () => {
     expect(impactRunsRelations).toBeDefined();
     expect(impactFindingsRelations).toBeDefined();
     expect(diagnosticsRelations).toBeDefined();
+    expect(testMappingsRelations).toBeDefined();
+  });
+
+  it('should define testMappings table with expected columns', () => {
+    expect(getTableName(testMappings)).toBe('test_mappings');
+    const cols = getTableColumns(testMappings);
+
+    expect(cols.id.primary).toBe(true);
+    expect(cols.snapshotId.notNull).toBe(true);
+    expect(cols.testFilePath.notNull).toBe(true);
+    expect(cols.testSymbolId.notNull).toBe(false);
+    expect(cols.sourceFilePath.notNull).toBe(true);
+    expect(cols.sourceSymbolId.notNull).toBe(false);
+    expect(cols.evidenceLevel.notNull).toBe(true);
+    expect(cols.confidence.notNull).toBe(true);
+    expect(cols.line.notNull).toBe(false);
+    expect(cols.notes.notNull).toBe(false);
   });
 });
 
